@@ -1,3 +1,8 @@
+'''
+Authors Github: JPab-Dev
+version: 1.2
+'''
+
 #Blackjack program
 import random
 from time import sleep
@@ -16,6 +21,7 @@ def create_deck(deck = []):
 #This function returns the value of the whole hand of the player --------------------------------------------------
 def get_hand_value(hand):
     score = 0
+    Aces = 0
     for card in hand:
         if card[0] == '2':
             score += 2
@@ -35,10 +41,13 @@ def get_hand_value(hand):
             score += 9
         elif card[0] == '1' or card[0] == 'J' or card[0] == 'Q' or card[0] == 'K':
             score += 10
-        elif card[0] == 'A':
+        elif card[0] == 'A' and Aces == 0:
+            Aces += 1
             score += 11
             if score > 21:
                 score -= 10
+        elif card[0] == 'A' and Aces > 0:
+            score += 1
 
     return score
 
@@ -60,7 +69,7 @@ def croupier_turn(croupier, deck):
     sleep(3)
     if len(croupier) == 2:
         print('\n---------------------------------------------------\n')
-    print(f'\ncroupier stands, total croupier hand value: {get_hand_value(croupier)}\n') 
+    print(f'croupier stands, total croupier hand value: {get_hand_value(croupier)}\n') 
     
     return croupier, deck
 
@@ -75,6 +84,8 @@ def compare_player_croupier(player, croupier):
 
     elif get_hand_value(player) < get_hand_value(croupier):
         print(f'you lost :C, by a diference of {(get_hand_value(croupier) - get_hand_value(player))}\n')
+
+    return player, croupier
 
 #This function shows both hands, the player and the croupier hand -------------------------------------------------
 def show_hands(player, croupier, reveal_croupier = False):
@@ -108,80 +119,95 @@ def show_hands(player, croupier, reveal_croupier = False):
 
         print(f'\nvalue in your hand: {get_hand_value(player)}')
 
-
 #Here starts main: -<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<-<
 
-print('-------------------- BLACKJACK --------------------\n')
+continue_game = True
+round = 1
 
-deck = []
-player = []
-croupier = []
-create_deck(deck)
-random.shuffle(deck)
+while continue_game:
+    print('-------------------- BLACKJACK --------------------\n')
 
-for i in range (2):
-    player.append(deck.pop())
-    croupier.append(deck.pop())
+    player = []
+    croupier = []
 
-show_hands(player, croupier)
+    if round == 1 or len(deck) < 16:
 
-print('\n---------------------------------------------------')
-
-if get_hand_value(player) == 21:
-    print('\nYou have a blackjack, you win :D')
-
-elif get_hand_value(croupier) == 21:
-    print('\nBlackjack for the croupier, croupier wins >:c')
-    show_hands([], croupier, True)
-
-else:
-
-    stand = False
-    while (not stand) and get_hand_value(player) <= 21:
-
-        hit_or_stand = str(input('\nHit or Stand? '))
-
-        if hit_or_stand[0] == 'H' or hit_or_stand[0] == 'h':
-            player.append(deck.pop())
-
-            print('\n---------------------------------------------------')
-            print(f'you have added a [{player[-1]}] to your hand\n')
-            sleep(2)
-            show_hands(player, [])
-            print('\n---------------------------------------------------')
-
+        print('---------------------------------------------------')
+        if round == 1:
+            print('Croupier shuffles the deck')
         else:
-            stand = True
-            print('\n---------------------------------------------------\n')
-    
-    if get_hand_value(player) <= 21:
-        print('Its the croupier turn', end="")
-        for i in ['.', '.', '.']:
-            sleep(1)
-            print(i, end="")
-        print('\n')
+            print('Croupier shuffles the deck again')
+        print('---------------------------------------------------\n')
 
+        deck = []
+        create_deck(deck)
+        random.shuffle(deck)
+
+    for i in range (2):
+        player.append(deck.pop())
+        croupier.append(deck.pop())
+
+    show_hands(player, croupier)
+
+    print('\n---------------------------------------------------')
+
+    if get_hand_value(player) == 21:
+        print('\nYou have a blackjack, you win :D')
+
+    elif get_hand_value(croupier) == 21:
+        print('\nBlackjack for the croupier, croupier wins >:c')
         show_hands([], croupier, True)
 
-        croupier_turn(croupier, deck)
+    else:
 
-        if get_hand_value(croupier) <= 21:
-            print('---------------------------------------------------\n')
-            sleep(4)
-            show_hands(player, croupier, True)
-            print('\n---------------------------------------------------\n')
+        stand = False
+        while (not stand) and get_hand_value(player) <= 21:
 
-            compare_player_croupier(player, croupier)
+            hit_or_stand = str(input('\nHit or Stand? '))
+
+            if hit_or_stand[0] == 'H' or hit_or_stand[0] == 'h':
+                player.append(deck.pop())
+
+                print('\n---------------------------------------------------')
+                print(f'you have added a [{player[-1]}] to your hand\n')
+                sleep(2)
+                show_hands(player, [])
+                print('\n---------------------------------------------------')
+
+            else:
+                stand = True
+                print('\n---------------------------------------------------\n')
+        
+        if get_hand_value(player) <= 21:
+            print('Its the croupier turn', end="")
+            for i in ['.', '.', '.']:
+                sleep(1)
+                print(i, end="")
+            print('\n')
+
+            show_hands([], croupier, True)
+
+            croupier_turn(croupier, deck)
+
+            if get_hand_value(croupier) <= 21:
+                print('---------------------------------------------------\n')
+                sleep(4)
+                show_hands(player, croupier, True)
+                print('\n---------------------------------------------------\n')
+
+                compare_player_croupier(player, croupier)
+
+        else:
+            sleep(1)
+            print(f'\nyou lost, you were over 21 :C, your hand value: {get_hand_value(player)}\n')
+
+    print('---------------------------------------------------')
+    ask_for_stop = str(input('\nPlay again? '))
+
+    if ask_for_stop[0] == 'Y' or ask_for_stop[0] == 'y':
+        round += 1
+        print('\n---------------------------------------------------')
+        print(f'Round {round}                           cards in deck: {len(deck)}\n')
 
     else:
-        sleep(1)
-        print(f'\nyou lost, you were over 21 :C, your hand value: {get_hand_value(player)}')
-
-    
-
-# Mejoras a programar:
-
-'''#1.- si el croupier consigue blackjack, imprimir de nuevo la mano del croupier'''
-#2.- que se pueda jugar de nuevo 
-#3.- que se puedan apostar fichas
-#4.- que cuando la baraja se acabe al repartir cartas, que se barajie una nueva carta
+        continue_game = False
